@@ -1,0 +1,56 @@
+version: '3'
+services:
+  spark-master:
+    build:
+      context: .
+      dockerfile: spark-cluster.Dockerfile
+    image: my-custom-spark:1.0
+    container_name: spark-master
+    environment:
+      - SPARK_WORKLOAD=master
+      - SPARK_MASTER_URL=spark://spark-master:7077
+    ports:
+      - "8080:8080" # Spark Master Web UI
+      - "7077:7077" # Spark Master RPC
+    networks:
+      - spark-network
+    volumes:
+      - ./data:/data
+
+  spark-worker1:
+    build:
+      context: .
+      dockerfile: spark-cluster.Dockerfile
+    image: my-custom-spark:1.0
+    container_name: spark-worker1
+    environment:
+      - SPARK_WORKLOAD=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_WEBUI_PORT=8081
+    ports:
+      - "8081:8081" # Spark Worker 1 Web UI
+    networks:
+      - spark-network
+    volumes:
+      - ./data:/data
+
+  spark-worker2:
+    build:
+      context: .
+      dockerfile: spark-cluster.Dockerfile
+    image: my-custom-spark:1.0
+    container_name: spark-worker2
+    environment:
+      - SPARK_WORKLOAD=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_WEBUI_PORT=8082
+    ports:
+      - "8082:8082" # Spark Worker 2 Web UI
+    networks:
+      - spark-network
+    volumes:
+      - ./data:/data
+
+networks:
+  spark-network:
+    driver: bridge
